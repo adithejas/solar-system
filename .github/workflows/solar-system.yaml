@@ -165,9 +165,30 @@ jobs:
 
       - name: Create k8s Kind Cluster
         uses: helm/kind-action@v1
-
+        
+      - name: Fetch ingress controller ip address
+        run: |
+          echo "INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" >> $GITHUB_ENV
+          
       - name: Fetch K8's Cluster details
         run: |
           kubectl version --client
           echo -------------------
           kubectl get nodes
+
+      - name: Replace tokens in deployment.yaml
+        uses: cschleiden/replace-tokens@v1
+        with:
+          tokenPrefix: '_{_'
+          tokenSuffix: '_}_'
+          files: '["kubernetes/deployment.yaml"]'
+        env:
+            NAMESPACE: ${{ vars.NAMESPACE }}
+            REPLICAS: ${{ vars.REPLICAS }}
+            IMAGE: ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
+            INGRESS_IP: ${{ env.INGRESS_IP }}
+
+      - name: Read Deploymnt yaml file
+        run: |
+          cat kubernetes/deployment.yaml
+          
