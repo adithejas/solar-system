@@ -16,9 +16,11 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.18.2",
+    "lint": "^1.2.2",
     "mocha-junit-reporter": "^2.2.1",
     "mongoose": "6.13.10",
-    "nyc": "^18.0.0"
+    "nyc": "^18.0.0",
+    "prettier": "^3.9.6"
   },
   "devDependencies": {
     "chai": "*",
