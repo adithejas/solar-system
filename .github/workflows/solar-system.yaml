@@ -10,6 +10,8 @@ env:
   MONGO_URI: "mongodb+srv://supercluster.d83jj.mongodb.net/superData"
   MONGO_USERNAME: ${{ vars.MONGO_USERNAME }}
   MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 jobs:
   unit-tests:
     name: Run Unit Tests
@@ -83,3 +85,16 @@ jobs:
           name: coverage-report ${{github.actor}}
           path: coverage
           retention-days: 1
+
+  Docker-Login:
+    name: Docker Login
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
