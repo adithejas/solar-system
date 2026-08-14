@@ -111,7 +111,7 @@ jobs:
         run: |
           docker run -d \
             --name solar-system-app \
-            --publish 3000:30000 \
+            --publish 3000:3000 \
             -e MONGO_URI="${{ env.MONGO_URI }}" \
             -e MONGO_USERNAME="${{ vars.MONGO_USERNAME }}" \
             -e MONGO_PASSWORD="${{ secrets.MONGO_PASSWORD }}" \
