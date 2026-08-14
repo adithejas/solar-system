@@ -13,7 +13,14 @@ env:
 jobs:
   unit-tests:
     name: Run Unit Tests
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20, 18, 19]
+        os: [ubuntu-latest, windows-latest]
+        exclude:
+          - node-version: 19
+            os: windows-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -21,7 +28,7 @@ jobs:
       - name: setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
         run: npm install
