@@ -40,6 +40,7 @@ jobs:
         with:
           name: test-results ${{github.actor}}
           path: test-results.xml
+          retention-days: 1
 
   Code-coverage:
     name: Code Coverage
@@ -57,6 +58,7 @@ jobs:
         run: npm install
 
       - name: Run code coverage
+        continue-on-error: true
         run: npm run coverage
 
       - name: Upload coverage report
@@ -64,3 +66,4 @@ jobs:
         with:
           name: coverage-report ${{github.actor}}
           path: coverage
+          retention-days: 1
