@@ -163,12 +163,8 @@ jobs:
         with:
           version: 'latest'
 
-      - name: Setup K8s Config
-        uses: azure/k8s-set-context@v5
-        with:
-            method: kubeconfig
-            kubeconfig: ${{ secrets.KUBE_CONFIG }} 
-
+      - name: Create k8s Kind Cluster
+        uses: helm/kind-action@v1
 
       - name: Fetch K8's Cluster details
         run: |
