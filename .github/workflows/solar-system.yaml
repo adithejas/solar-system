@@ -29,8 +29,8 @@ jobs:
       - name: Run unit tests
         run: npm test
 
-      - name: Upload test results
+      - name: Archive test results
         uses: actions/upload-artifact@v7
         with:
           name: test-results {{github.pr.number}}
-          path: test/test-results.xml
+          path: test-results.xml
