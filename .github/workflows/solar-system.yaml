@@ -156,7 +156,7 @@ jobs:
         uses: azure/k8s-set-context@v5
         with:
             method: kubeconfig
-            kubeconfig: ${{ secrets.KUBECONFIG }} 
+            kubeconfig: ${{ secrets.KUBE_CONFIG }} 
 
 
       - name: Fetch K8's Cluster details
