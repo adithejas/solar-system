@@ -138,6 +138,8 @@ jobs:
           tags: |
            ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
             ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   Dev-Deployment:
     name: Deploy to Development Environment
@@ -161,6 +163,6 @@ jobs:
 
       - name: Fetch K8's Cluster details
         run: |
-          kubectl version --short
+          kubectl version --client
           echo -------------------
           kubectl get nodes
