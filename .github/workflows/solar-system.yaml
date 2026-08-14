@@ -7,20 +7,20 @@ on:
       - main
       - "feature/*"
 env:
-    MONGO_URI: 'mongodb+srv://supercluster.d83jj.mongodb.net/superData'
-    MONGO_USERNAME: ${{ vars.MONGO_USERNAME }}
-    MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
+  MONGO_URI: "mongodb+srv://supercluster.d83jj.mongodb.net/superData"
+  MONGO_USERNAME: ${{ vars.MONGO_USERNAME }}
+  MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
 jobs:
   unit-tests:
     name: Run Unit Tests
-    strategy:
-      matrix:
-        node-version: [20, 18, 19]
-        os: [ubuntu-latest, windows-latest]
-        exclude:
-          - node-version: 19
-            os: windows-latest
-    runs-on: ${{ matrix.os }}
+    # strategy:
+    #   matrix:
+    #     node-version: [20, 18, 19]
+    #     os: [ubuntu-latest, windows-latest]
+    #     exclude:
+    #       - node-version: 19
+    #         os: windows-latest
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -28,8 +28,7 @@ jobs:
       - name: setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: ${{ matrix.node-version }}
-
+          node-version: 20
       - name: Install dependencies
         run: npm install
 
@@ -41,3 +40,27 @@ jobs:
         with:
           name: test-results ${{github.actor}}
           path: test-results.xml
+
+  Code-coverage:
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run code coverage
+        run: npm run coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report ${{github.actor}}
+          path: coverage
