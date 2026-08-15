@@ -41,7 +41,7 @@ jobs:
       # - name: Install dependencies
       #   run: npm install
       - name: Using Composite actions
-        uses: ./.github/actions/action.yaml
+        uses: ./.github/actions
         with:
           node-version: '20'
 
