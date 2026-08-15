@@ -167,7 +167,7 @@ jobs:
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: '1.35.5'
+          version: 'latest'
         
       - name: Fetch ingress controller ip address
         run: |
