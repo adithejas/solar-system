@@ -156,15 +156,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@v5
+
+      - name: Set up Kubeconfig
+        uses: azure/k8s-set-context@v4
+        with:
+          method: kubeconfig
+          kubeconfig: ${{ secrets.KUBECONFIG }}
 
       - name: Install kubectl
         uses: azure/setup-kubectl@v3
         with:
-          version: 'latest'
-
-      - name: Create k8s Kind Cluster
-        uses: helm/kind-action@v1
+          version: '1.35.5'
         
       - name: Fetch ingress controller ip address
         run: |
@@ -188,7 +191,7 @@ jobs:
             IMAGE: ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
             INGRESS_IP: ${{ env.INGRESS_IP }}
 
-      - name: Read Deploymnt yaml file
+      - name: Read Deployment yaml file
         run: |
           cat kubernetes/deployment.yaml
           
