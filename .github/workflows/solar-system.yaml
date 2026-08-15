@@ -24,22 +24,26 @@ jobs:
     #         os: windows-latest
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # - name: Checkout code
+      #   uses: actions/checkout@v4
 
-      - name: setup Node.js
-        uses: actions/setup-node@v7
+      # - name: setup Node.js
+      #   uses: actions/setup-node@v7
+      #   with:
+      #     node-version: 24
+
+      # - name: Cache node modules
+      #   uses: actions/cache@v6
+      #   with:
+      #     path: node_modules
+      #     key: {{ runner.os }}-node-{{ hashFiles('package-lock.json') }}
+
+      # - name: Install dependencies
+      #   run: npm install
+      - name: Using Composite actions
+        uses: ./.github/actions/action.yaml
         with:
-          node-version: 24
-
-      - name: Cache node modules
-        uses: actions/cache@v6
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-
-      - name: Install dependencies
-        run: npm install
+          node-version: '20'
 
       - name: Run unit tests
         run: npm test
