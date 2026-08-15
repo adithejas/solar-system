@@ -66,18 +66,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: setup Node.js
-        uses: actions/setup-node@v7
+        uses: ./.github/actions
         with:
           node-version: 20
-
-      - name: Cache node modules
-        uses: actions/cache@v6
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-
-      - name: Install dependencies
-        run: npm install
 
       - name: Run code coverage
         continue-on-error: true
