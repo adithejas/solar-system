@@ -145,10 +145,15 @@ jobs:
           docker push ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
           docker push ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}
           
-
   Dev-Deployment:
     name: Deploy to Development Environment
+    if: github.ref != 'refs/heads/main'
     needs: Container-build
+    environment:
+      name: deployment
+      url: http://${{ steps.set-app-ingress-url.outputs.APP_INGRESS_HOST }}
+    outputs:
+      APP_INGRESS_HOST: ${{ steps.set-app-ingress-url.outputs.APP_INGRESS_HOST }}
     runs-on: self-hosted
     steps:
       - name: Checkout code
@@ -180,4 +185,94 @@ jobs:
       - name: Read Deployment yaml file
         run: |
           cat kubernetes/deployment.yaml
+
+      - name: Apply Deployment to K8s Cluster
+        run: |  
+          kubectl apply -f kubernetes/deployment.yaml
+          echo "Waiting for deployment to be ready..."
+          kubectl rollout status deployment/solar-system-deployment -n ${{ vars.NAMESPACE }} --timeout=120s
+
+      - name: Set app ingress URL
+        id: set-app-ingress-url
+        run: |
+          echo "APP_INGRESS_HOST=$(kubectl -n ${{ vars.NAMESPACE }} get ingress -o jsonpath='{.items[0].spec.rules[0].host[0]}')" >> $GITHUB_OUTPUT
+
+  Integration-tests-Dev:
+    name: Run Integration Tests
+    needs: Dev-Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Integration using wget
+        env: 
+          url: http://${{ needs.Dev-Deployment.outputs.APP_INGRESS_HOST }}/live
+        run: |
+          echo $url
+          echo "_____________________________________"
+          curl -s -k http://${{ needs.Dev-Deployment.outputs.APP_INGRESS_HOST }}/live | grep -i live
+          
+  Prod-Deployment:
+    name: Deploy to Production Environment
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: Container-build
+    environment:
+      name: prod
+      url: http://${{ steps.set-app-ingress-url.outputs.APP_INGRESS_HOST }}
+    outputs:
+      APP_INGRESS_HOST: ${{ steps.set-app-ingress-url.outputs.APP_INGRESS_HOST }}
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Fetch ingress controller ip address
+        run: |
+          echo "INGRESS_IP=$(kubectl get svc -n ingress-nginx ingress-nginx-controller -o jsonpath='{.status.loadBalancer.ingress[0].ip}')" >> $GITHUB_ENV
+          
+      - name: Fetch K8's Cluster details
+        run: |
+          kubectl version --client
+          echo -------------------
+          kubectl get nodes
+
+      - name: Replace tokens in production.yaml
+        uses: cschleiden/replace-tokens@v1
+        with:
+          tokenPrefix: '_{_'
+          tokenSuffix: '_}_'
+          files: '["kubernetes/production.yaml"]'
+        env:
+            ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
+            NAMESPACE: ${{ vars.NAMESPACE }}
+            REPLICAS: ${{ vars.REPLICAS }}
+            IMAGE: ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
+            INGRESS_IP: ${{ env.INGRESS_IP }}
+
+      - name: Read Production yaml file
+        run: |
+          cat kubernetes/production.yaml
+
+      - name: Apply Production Configuration to K8s Cluster
+        run: |  
+          kubectl apply -f kubernetes/production.yaml
+          
+
+      - name: Set app ingress URL
+        id: set-app-ingress-url
+        run: |
+          echo "APP_INGRESS_HOST=$(kubectl -n ${{ vars.NAMESPACE }} get ingress -o jsonpath='{.items[0].spec.rules[0].host[0]}')" >> $GITHUB_OUTPUT
+
+  Integration-tests-Prod:
+    name: Run Integration Tests
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: Prod-Deployment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Integration using wget
+        env: 
+          url: http://${{ needs.Prod-Deployment.outputs.APP_INGRESS_HOST }}/live
+        run: |
+          echo $url
+          echo "_____________________________________"
+          curl -s -k http://${{ needs.Prod-Deployment.outputs.APP_INGRESS_HOST }}/live | grep -i live        
+  
           
