@@ -186,6 +186,7 @@ jobs:
           tokenSuffix: '_}_'
           files: '["kubernetes/deployment.yaml"]'
         env:
+            ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: "true"
             NAMESPACE: ${{ vars.NAMESPACE }}
             REPLICAS: ${{ vars.REPLICAS }}
             IMAGE: ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
