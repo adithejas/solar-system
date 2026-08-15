@@ -140,14 +140,10 @@ jobs:
           wget -qO- 127.0.0.1:3000/live | grep live
             
       - name: Push Docker image to Docker Hub and GHCR
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
-          tags: |
-            ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
-            ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}
-          cache-from: type=gha
+        run: |
+          docker tag ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }} ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/solar-system:${{ github.sha }}
+          docker push ghcr.io/${{ github.repository_owner }}/solar-system:${{ github.sha }}
           
 
   Dev-Deployment:
